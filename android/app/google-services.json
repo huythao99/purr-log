@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1041153038304",
+    "project_id": "purrlog-53e0e",
+    "storage_bucket": "purrlog-53e0e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041153038304:android:20ebae1451cc13f0c07d85",
+        "android_client_info": {
+          "package_name": "com.example.pet_log"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBImP6HRSRJ4MKIKDe_mtxTTMAm6sqnT5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

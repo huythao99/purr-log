@@ -1,0 +1,63 @@
+name: pet_log
+description: "Pet Log - Track your pets' health, feeding, and activities"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Database
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.4
+
+  # State Management
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.5
+
+  # Dependency Injection
+  get_it: ^9.2.1
+
+  # Routing
+  go_router: ^17.1.0
+
+  # Scanner & OCR
+  mobile_scanner: ^7.2.0
+  google_mlkit_text_recognition: ^0.15.1
+
+  # Notifications
+  flutter_local_notifications: ^21.0.0
+  timezone: ^0.11.0
+
+  # UI & Utils
+  image_picker: ^1.1.2
+  fl_chart: ^1.2.0
+  intl: ^0.20.1
+  uuid: ^4.5.1
+  permission_handler: ^12.0.1
+  firebase_core: ^4.5.0
+  firebase_remote_config: ^6.2.0
+  firebase_analytics: ^12.1.3
+  google_mobile_ads: ^7.0.0
+  flutter_native_splash: ^2.4.7
+  rename_app: ^1.6.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.13
+  isar_generator: ^3.1.0+1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
