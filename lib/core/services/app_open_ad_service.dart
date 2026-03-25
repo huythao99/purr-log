@@ -18,7 +18,7 @@ class AppOpenAdService with WidgetsBindingObserver {
   // Test Ad Unit IDs (Google official test IDs)
   static const String _androidAdUnitId =
       'ca-app-pub-3940256099942544/9257395921';
-  static const String _iosAdUnitId = 'ca-app-pub-3940256099942544/5575463023';
+  static const String _iosAdUnitId = 'ca-app-pub-3726952827286259/3644798434';
 
   String get _adUnitId => Platform.isAndroid ? _androidAdUnitId : _iosAdUnitId;
 

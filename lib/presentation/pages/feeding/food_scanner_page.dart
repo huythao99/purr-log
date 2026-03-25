@@ -147,15 +147,67 @@ class _FoodScannerViewState extends State<FoodScannerView>
         ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(
-            'Point camera at barcode',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+          child: Column(
+            children: [
+              Text(
+                'Point camera at barcode',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _scanBarcodeFromGallery,
+                icon: const Icon(Icons.photo_library),
+                label: const Text('Pick from Gallery'),
+              ),
+            ],
           ),
         ),
       ],
     );
+  }
+
+  Future<void> _scanBarcodeFromGallery() async {
+    try {
+      final image = await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+
+      setState(() => _isProcessing = true);
+
+      final result = await _barcodeController.analyzeImage(image.path);
+
+      if (result != null && result.barcodes.isNotEmpty) {
+        final barcode = result.barcodes.first.rawValue;
+        if (barcode != null && mounted) {
+          context.read<FoodScannerBloc>().add(
+                FoodScannerBarcodeScanned(barcode),
+              );
+          return;
+        }
+      }
+
+      // No barcode found
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No barcode found in the image'),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+        setState(() => _isProcessing = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error scanning image: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        setState(() => _isProcessing = false);
+      }
+    }
   }
 
   Widget _buildNutritionScanner() {

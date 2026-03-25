@@ -66,9 +66,9 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
-		<!-- AdMob App ID (Test ID) -->
+		<!-- AdMob App ID -->
 		<key>GADApplicationIdentifier</key>
-		<string>ca-app-pub-3940256099942544~1458002511</string>
+		<string>ca-app-pub-3726952827286259~4359114303</string>
 		<!-- SKAdNetwork for iOS 14+ attribution -->
 		<key>SKAdNetworkItems</key>
 		<array>
@@ -81,5 +81,11 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<!-- Camera permission for barcode scanner -->
+		<key>NSCameraUsageDescription</key>
+		<string>PurrLog needs camera access to scan barcodes and nutrition labels on pet food packages.</string>
+		<!-- Photo library permission for selecting nutrition label images -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>PurrLog needs photo library access to select images of nutrition labels.</string>
 	</dict>
 </plist>
