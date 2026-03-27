@@ -100,4 +100,26 @@ class FeedingRepository {
         .brandContains(query, caseSensitive: false)
         .findAll();
   }
+
+  Future<Map<DateTime, double>> getWeeklyKcalTotals(int petId, {int days = 7}) async {
+    final result = <DateTime, double>{};
+    final today = DateTime.now();
+
+    for (int i = days - 1; i >= 0; i--) {
+      final date = DateTime(today.year, today.month, today.day).subtract(Duration(days: i));
+      final kcal = await getTotalKcalForDate(petId, date);
+      result[date] = kcal;
+    }
+
+    return result;
+  }
+
+  Future<List<FeedingLog>> getFeedingLogsInRange(int petId, DateTime start, DateTime end) async {
+    return _isar.feedingLogs
+        .filter()
+        .petIdEqualTo(petId)
+        .feedingTimeBetween(start, end)
+        .sortByFeedingTimeDesc()
+        .findAll();
+  }
 }

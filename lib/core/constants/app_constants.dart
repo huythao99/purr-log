@@ -17,6 +17,17 @@ class AppConstants {
     'cat_senior': 35.0,
   };
 
+  // Recommended daily activity minutes by species
+  static const Map<String, int> dailyActivityMinutes = {
+    'dog': 30,
+    'cat': 15,
+    'bird': 20,
+    'rabbit': 20,
+    'hamster': 15,
+    'guineaPig': 15,
+    'other': 15,
+  };
+
   // Image
   static const int maxImageWidth = 800;
   static const int maxImageHeight = 800;

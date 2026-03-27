@@ -8,6 +8,8 @@ import '../../data/repositories/reminder_repository.dart';
 import '../../data/repositories/activity_repository.dart';
 import '../services/remote_config_service.dart';
 import '../services/app_open_ad_service.dart';
+import '../services/pdf_report_service.dart';
+import '../services/share_service.dart';
 import '../utils/notification_service.dart';
 
 final getIt = GetIt.instance;
@@ -20,6 +22,8 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<AppOpenAdService>(
     () => AppOpenAdService(remoteConfigService: getIt<RemoteConfigService>()),
   );
+  getIt.registerLazySingleton<PdfReportService>(() => PdfReportService());
+  getIt.registerLazySingleton<ShareService>(() => ShareService());
 
   // Repositories
   getIt.registerLazySingleton<PetRepository>(

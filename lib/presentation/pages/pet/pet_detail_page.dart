@@ -9,9 +9,18 @@ import '../../../core/di/injection.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../data/models/pet_model.dart';
 import '../../../data/repositories/pet_repository.dart';
+import '../../../data/repositories/feeding_repository.dart';
+import '../../../data/repositories/activity_repository.dart';
+import '../../../data/repositories/health_repository.dart';
+import '../../../core/services/pdf_report_service.dart';
+import '../../../core/services/share_service.dart';
 import '../../blocs/pet/pet_bloc.dart';
 import '../../blocs/pet/pet_event.dart';
 import '../../blocs/pet/pet_state.dart';
+import '../../blocs/pdf_report/pdf_report_bloc.dart';
+import '../../blocs/pdf_report/pdf_report_event.dart';
+import '../../blocs/pdf_report/pdf_report_state.dart';
+import '../../widgets/wellness_score_indicator.dart';
 
 class PetDetailPage extends StatelessWidget {
   final int petId;
@@ -20,8 +29,26 @@ class PetDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PetBloc(getIt<PetRepository>())..add(PetLoadOne(petId)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => PetBloc(
+            getIt<PetRepository>(),
+            feedingRepository: getIt<FeedingRepository>(),
+            activityRepository: getIt<ActivityRepository>(),
+            healthRepository: getIt<HealthRepository>(),
+          )..add(PetLoadOne(petId)),
+        ),
+        BlocProvider(
+          create: (context) => PdfReportBloc(
+            getIt<PdfReportService>(),
+            getIt<ShareService>(),
+            getIt<PetRepository>(),
+            getIt<FeedingRepository>(),
+            getIt<HealthRepository>(),
+          ),
+        ),
+      ],
       child: PetDetailView(petId: petId),
     );
   }
@@ -57,6 +84,7 @@ class PetDetailView extends StatelessWidget {
 
         if (state is PetDetailLoaded) {
           final pet = state.pet;
+          final wellnessScore = state.wellnessScore;
           return Scaffold(
             body: CustomScrollView(
               slivers: [
@@ -97,6 +125,13 @@ class PetDetailView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (wellnessScore != null) ...[
+                          WellnessScoreIndicator(
+                            score: wellnessScore,
+                            showBreakdown: true,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                         _buildInfoCard(context, pet),
                         const SizedBox(height: 16),
                         _buildQuickActions(context, pet),
@@ -212,9 +247,26 @@ class PetDetailView extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _QuickActionCard(
+                icon: Icons.bar_chart,
+                label: 'Charts',
+                color: AppColors.info,
+                onTap: () => context.push(AppRoutes.petChartsPath(pet.id)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _VetReportCard(petId: pet.id),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionCard(
                 icon: Icons.qr_code_scanner,
                 label: 'Scan Food',
-                color: AppColors.info,
+                color: AppColors.primary,
                 onTap: () => context.push(AppRoutes.foodScannerPath(pet.id)),
               ),
             ),
@@ -291,6 +343,80 @@ class _QuickActionCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _VetReportCard extends StatelessWidget {
+  final int petId;
+
+  const _VetReportCard({required this.petId});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<PdfReportBloc, PdfReportState>(
+      listener: (context, state) {
+        if (state is PdfReportError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to generate report: ${state.message}'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          context.read<PdfReportBloc>().add(const PdfReportReset());
+        }
+        if (state is PdfReportShared) {
+          context.read<PdfReportBloc>().add(const PdfReportReset());
+        }
+      },
+      builder: (context, state) {
+        final isGenerating = state is PdfReportGenerating;
+
+        return Card(
+          child: InkWell(
+            onTap: isGenerating
+                ? null
+                : () {
+                    context
+                        .read<PdfReportBloc>()
+                        .add(PdfReportGenerate(petId: petId));
+                  },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: isGenerating
+                        ? const SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(
+                            Icons.picture_as_pdf,
+                            color: AppColors.secondary,
+                            size: 28,
+                          ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    isGenerating ? 'Generating...' : 'Vet Report',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

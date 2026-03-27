@@ -13,6 +13,7 @@ class AppRoutes {
   static const String petDetail = '/pets/:id';
   static const String petAdd = '/pets/add';
   static const String petEdit = '/pets/:id/edit';
+  static const String petCharts = '/pets/:id/charts';
 
   // Feeding routes
   static const String feedingList = '/pets/:petId/feeding';
@@ -34,6 +35,7 @@ class AppRoutes {
   // Helper methods
   static String petDetailPath(int id) => '/pets/$id';
   static String petEditPath(int id) => '/pets/$id/edit';
+  static String petChartsPath(int id) => '/pets/$id/charts';
   static String feedingListPath(int petId) => '/pets/$petId/feeding';
   static String feedingAddPath(int petId) => '/pets/$petId/feeding/add';
   static String foodScannerPath(int? petId) =>

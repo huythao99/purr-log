@@ -13,9 +13,12 @@ import '../../../data/models/reminder_model.dart';
 import '../../../data/repositories/pet_repository.dart';
 import '../../../data/repositories/feeding_repository.dart';
 import '../../../data/repositories/reminder_repository.dart';
+import '../../../data/repositories/activity_repository.dart';
+import '../../../data/repositories/health_repository.dart';
 import '../../blocs/dashboard/dashboard_bloc.dart';
 import '../../blocs/dashboard/dashboard_event.dart';
 import '../../blocs/dashboard/dashboard_state.dart';
+import '../../widgets/wellness_score_indicator.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -27,6 +30,8 @@ class DashboardPage extends StatelessWidget {
         getIt<PetRepository>(),
         getIt<FeedingRepository>(),
         getIt<ReminderRepository>(),
+        getIt<ActivityRepository>(),
+        getIt<HealthRepository>(),
       )..add(const DashboardLoad()),
       child: const DashboardView(),
     );
@@ -172,10 +177,12 @@ class DashboardView extends StatelessWidget {
         ...data.pets.take(3).map((pet) {
           final todayKcal = data.todayKcalByPet[pet.id] ?? 0;
           final recommendedKcal = data.recommendedKcalByPet[pet.id] ?? 0;
+          final wellnessScore = data.wellnessScoreByPet[pet.id];
           return _PetDashboardCard(
             pet: pet,
             todayKcal: todayKcal,
             recommendedKcal: recommendedKcal,
+            wellnessScore: wellnessScore?.totalScore,
           );
         }),
       ],
@@ -286,11 +293,13 @@ class _PetDashboardCard extends StatelessWidget {
   final Pet pet;
   final double todayKcal;
   final double recommendedKcal;
+  final int? wellnessScore;
 
   const _PetDashboardCard({
     required this.pet,
     required this.todayKcal,
     required this.recommendedKcal,
+    this.wellnessScore,
   });
 
   @override
@@ -306,14 +315,24 @@ class _PetDashboardCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
-                backgroundImage:
-                    pet.photoPath != null ? FileImage(File(pet.photoPath!)) : null,
-                child: pet.photoPath == null
-                    ? Text(pet.species.emoji, style: const TextStyle(fontSize: 24))
-                    : null,
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
+                    backgroundImage:
+                        pet.photoPath != null ? FileImage(File(pet.photoPath!)) : null,
+                    child: pet.photoPath == null
+                        ? Text(pet.species.emoji, style: const TextStyle(fontSize: 24))
+                        : null,
+                  ),
+                  if (wellnessScore != null)
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: WellnessScoreBadge(score: wellnessScore!, size: 24),
+                    ),
+                ],
               ),
               const SizedBox(width: 16),
               Expanded(

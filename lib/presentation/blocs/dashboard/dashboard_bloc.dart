@@ -1,10 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/wellness_calculator.dart';
 import '../../../data/models/pet_model.dart';
 import '../../../data/repositories/pet_repository.dart';
 import '../../../data/repositories/feeding_repository.dart';
 import '../../../data/repositories/reminder_repository.dart';
+import '../../../data/repositories/activity_repository.dart';
+import '../../../data/repositories/health_repository.dart';
+import '../../../domain/entities/wellness_score.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
 
@@ -12,11 +16,15 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final PetRepository _petRepository;
   final FeedingRepository _feedingRepository;
   final ReminderRepository _reminderRepository;
+  final ActivityRepository _activityRepository;
+  final HealthRepository _healthRepository;
 
   DashboardBloc(
     this._petRepository,
     this._feedingRepository,
     this._reminderRepository,
+    this._activityRepository,
+    this._healthRepository,
   ) : super(const DashboardInitial()) {
     on<DashboardLoad>(_onLoad);
     on<DashboardRefresh>(_onRefresh);
@@ -39,6 +47,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final today = DateTime.now();
       final todayKcalByPet = <int, double>{};
       final recommendedKcalByPet = <int, double>{};
+      final wellnessScoreByPet = <int, WellnessScore>{};
 
       for (final pet in pets) {
         final todayKcal = await _feedingRepository.getTotalKcalForDate(pet.id, today);
@@ -46,6 +55,20 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
         final recommendedKcal = _calculateRecommendedKcal(pet);
         recommendedKcalByPet[pet.id] = recommendedKcal;
+
+        // Calculate wellness score
+        final todayActivityMinutes =
+            await _activityRepository.getTotalActivityMinutesForDate(pet.id, today);
+        final weightRecords = await _healthRepository.getWeightRecordsForPet(pet.id);
+
+        final wellnessScore = WellnessCalculator.calculate(
+          pet: pet,
+          todayKcal: todayKcal,
+          recommendedKcal: recommendedKcal,
+          todayActivityMinutes: todayActivityMinutes,
+          recentWeightRecords: weightRecords,
+        );
+        wellnessScoreByPet[pet.id] = wellnessScore;
       }
 
       emit(DashboardLoaded(DashboardData(
@@ -53,6 +76,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         upcomingReminders: upcomingReminders,
         todayKcalByPet: todayKcalByPet,
         recommendedKcalByPet: recommendedKcalByPet,
+        wellnessScoreByPet: wellnessScoreByPet,
       )));
     } catch (e) {
       emit(DashboardError(e.toString()));

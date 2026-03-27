@@ -6,6 +6,7 @@ import '../../presentation/pages/dashboard/dashboard_page.dart';
 import '../../presentation/pages/pet/pet_list_page.dart';
 import '../../presentation/pages/pet/pet_detail_page.dart';
 import '../../presentation/pages/pet/pet_form_page.dart';
+import '../../presentation/pages/pet/pet_charts_page.dart';
 import '../../presentation/pages/feeding/feeding_list_page.dart';
 import '../../presentation/pages/feeding/feeding_form_page.dart';
 import '../../presentation/pages/feeding/food_scanner_page.dart';
@@ -66,6 +67,13 @@ class AppRouter {
           builder: (context, state) {
             final petId = int.parse(state.pathParameters['id']!);
             return PetFormPage(petId: petId);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.petCharts,
+          builder: (context, state) {
+            final petId = int.parse(state.pathParameters['id']!);
+            return PetChartsPage(petId: petId);
           },
         ),
         GoRoute(

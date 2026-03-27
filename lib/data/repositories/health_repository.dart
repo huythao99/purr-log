@@ -106,4 +106,17 @@ class HealthRepository {
         .sortByRecordDateDesc()
         .watch(fireImmediately: true);
   }
+
+  Future<List<WeightRecord>> getWeightRecordsInRange(
+    int petId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    return _isar.weightRecords
+        .filter()
+        .petIdEqualTo(petId)
+        .recordDateBetween(start, end)
+        .sortByRecordDate()
+        .findAll();
+  }
 }
